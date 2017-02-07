@@ -3,6 +3,7 @@ CheckVersion("0.4")
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
 Import("other/freetype/freetype.lua")
+Import("other/luajit/luajit.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -12,6 +13,7 @@ config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-ve
 config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
+config:Add(luajit.OptFind("luajit", false))
 config:Add(FreeType.OptFind("freetype", true))
 config:Finalize("config.lua")
 
@@ -118,9 +120,11 @@ if family == "windows" then
 	if platform == "win32" then
 		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib32\\freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib32\\SDL.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other\\luajit\\windows\\lib32\\lua51.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib64\\freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib64\\SDL.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\luajit\\windows\\lib32\\lua51.dll"))	--ppb won't work
 	end
 
 	if config.compiler.driver == "cl" then
@@ -201,6 +205,11 @@ function build(settings)
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
+	
+		-- apply luajit settings
+	--if config.lua.value and config.luajit.value then
+		config.luajit:Apply(settings)
+	--end
 
 	-- build game components
 	engine_settings = settings:Copy()
