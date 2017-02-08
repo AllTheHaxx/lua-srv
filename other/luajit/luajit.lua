@@ -25,7 +25,7 @@ luajit = {
 		local apply = function(option, settings)
             settings.cc.includes:Add(luajit.basepath .. "/include")
             
-            if option.use_winlib ~= nil then
+            if option.use_winlib > 0 then
                 settings.link.libpath:Add(luajit.basepath .. "/windows/lib" .. option.use_winlib)
                 settings.link.libs:Add("lua51")
             elseif option.value == true then
