@@ -241,6 +241,13 @@ function build(settings)
 	-- apply freetype settings
 	config.freetype:Apply(client_settings)
 
+	if family == "unix" and (platform == "macosx" or platform == "linux") then
+		engine_settings.link.libs:Add("dl")
+		server_settings.link.libs:Add("dl")
+		client_settings.link.libs:Add("dl")
+		launcher_settings.link.libs:Add("dl")
+	end
+
 	engine = Compile(engine_settings, Collect("src/engine/shared/*.cpp", "src/base/*.c"))
 	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
 	server = Compile(server_settings, Collect("src/engine/server/*.cpp"))

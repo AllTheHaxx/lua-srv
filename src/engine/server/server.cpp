@@ -1254,6 +1254,8 @@ int CServer::Run()
 		return -1;
 	}
 
+	m_pLuaState = luaL_newstate();
+
 	// start server
 	NETADDR BindAddr;
 	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)

@@ -5,6 +5,8 @@
 
 #include <engine/server.h>
 
+#include <lua.hpp>
+
 
 class CSnapIDPool
 {
@@ -64,6 +66,8 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+
+	lua_State *m_pLuaState;
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
