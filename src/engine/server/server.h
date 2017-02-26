@@ -63,15 +63,18 @@ public:
 
 class CServer : public IServer
 {
+	friend class CLua;
+
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class ILua *m_pLua;
 
-	lua_State *m_pLuaState;
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
+	class ILua *Lua() { return m_pLua; }
 
 	enum
 	{
@@ -156,7 +159,7 @@ public:
 	char m_aCurrentMap[64];
 	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
-	int m_CurrentMapSize;
+	unsigned int m_CurrentMapSize;
 
 	CDemoRecorder m_DemoRecorder;
 	CRegister m_Register;
@@ -229,6 +232,10 @@ public:
 	static void ConStopRecord(IConsole::IResult *pResult, void *pUser);
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
+
+	// lua
+	static void ConLuaLastError(IConsole::IResult *pResult, void *pUser);
+
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainModCommandUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

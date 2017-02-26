@@ -9,6 +9,7 @@
 #include <game/version.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
+#include <engine/server/lua.h>
 #include "gamemodes/dm.h"
 #include "gamemodes/tdm.h"
 #include "gamemodes/ctf.h"
@@ -392,7 +393,7 @@ void CGameContext::SwapTeams()
 {
 	if(!m_pController->IsTeamplay())
 		return;
-	
+
 	SendChat(-1, CGameContext::CHAT_ALL, "Teams were swapped");
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -617,7 +618,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
 			int Team = pMsg->m_Team ? pPlayer->GetTeam() : CGameContext::CHAT_ALL;
-			
+
 			// trim right and set maximum length to 128 utf8-characters
 			int Length = 0;
 			const char *p = pMsg->m_pMessage;
@@ -1150,7 +1151,7 @@ void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 			++PlayerTeam;
 	PlayerTeam = (PlayerTeam+1)/2;
-	
+
 	pSelf->SendChat(-1, CGameContext::CHAT_ALL, "Teams were shuffled");
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -1162,7 +1163,7 @@ void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 			else if(CounterBlue == PlayerTeam)
 				pSelf->m_apPlayers[i]->SetTeam(TEAM_RED, false);
 			else
-			{	
+			{
 				if(rand() % 2)
 				{
 					pSelf->m_apPlayers[i]->SetTeam(TEAM_BLUE, false);
@@ -1442,6 +1443,7 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
+	m_pLua = Kernel()->RequestInterface<ILua>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
@@ -1471,9 +1473,12 @@ void CGameContext::OnConsoleInit()
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
+	m_pLua = Kernel()->RequestInterface<ILua>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
+	CLua::SetStaticVars(m_pServer, this);
 
 	//if(!data) // only load once
 		//data = load_data_from_memory(internal_data);
@@ -1489,14 +1494,29 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	//players = new CPlayer[MAX_CLIENTS];
 
 	// select gametype
-	if(str_comp(g_Config.m_SvGametype, "mod") == 0)
-		m_pController = new CGameControllerMOD(this);
+	if(str_comp(g_Config.m_SvGametype, "dm") == 0)
+		m_pController = new CGameControllerDM(this);
 	else if(str_comp(g_Config.m_SvGametype, "ctf") == 0)
 		m_pController = new CGameControllerCTF(this);
 	else if(str_comp(g_Config.m_SvGametype, "tdm") == 0)
 		m_pController = new CGameControllerTDM(this);
+	else if(Lua()->GametypeExists(g_Config.m_SvGametype))
+	{
+		Lua()->StartupLua();
+		m_pController = new CGameControllerLuaMod(this);
+		if(!Lua()->LoadGametype(g_Config.m_SvGametype))
+		{
+			Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "lua", "error while loading gametype '%s'", g_Config.m_SvGametype);
+			delete m_pController;
+			m_pController = new CGameControllerDM(this);
+		}
+	}
 	else
+	{
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "lua", "gametype '%s' does not exists", g_Config.m_SvGametype);
 		m_pController = new CGameControllerDM(this);
+	}
+
 
 	// setup core world
 	//for(int i = 0; i < MAX_CLIENTS; i++)

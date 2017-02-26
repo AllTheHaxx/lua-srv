@@ -1019,7 +1019,9 @@ void str_timestamp(char *buffer, int buffer_size);
 		Always returns 0.
 */
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
+typedef int (*FS_LISTDIR_CALLBACK_VERBOSE)(const char *name, const char *full_path, int is_dir, int dir_type, void *user);
 int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
+int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type, void *user);
 
 /*
 	Function: fs_makedir

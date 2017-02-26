@@ -4,6 +4,7 @@
 #define GAME_SERVER_GAMECONTEXT_H
 
 #include <engine/server.h>
+#include <engine/lua.h>
 #include <engine/console.h>
 #include <engine/shared/memheap.h>
 
@@ -39,6 +40,7 @@
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	ILua *m_pLua;
 	class IConsole *m_pConsole;
 	CLayers m_Layers;
 	CCollision m_Collision;
@@ -71,6 +73,7 @@ class CGameContext : public IGameServer
 	bool m_Resetting;
 public:
 	IServer *Server() const { return m_pServer; }
+	ILua *Lua() const { return m_pLua; }
 	class IConsole *Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }

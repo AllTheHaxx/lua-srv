@@ -11,6 +11,7 @@
 #include <engine/masterserver.h>
 #include <engine/server.h>
 #include <engine/storage.h>
+#include <engine/lua.h>
 
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
@@ -29,6 +30,7 @@
 
 #include "register.h"
 #include "server.h"
+#include "lua.h"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
@@ -1227,7 +1229,13 @@ int CServer::LoadMap(const char *pMapName)
 	// load complete map into memory for download
 	{
 		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		m_CurrentMapSize = (int)io_length(File);
+		long len = io_length(File);
+		if(len < 0)
+		{
+			dbg_msg("mapchecker", "error while getting current map size");
+			return 0;
+		}
+		m_CurrentMapSize = (unsigned int)len;
 		if(m_pCurrentMapData)
 			mem_free(m_pCurrentMapData);
 		m_pCurrentMapData = (unsigned char *)mem_alloc(m_CurrentMapSize, 1);
@@ -1253,8 +1261,6 @@ int CServer::Run()
 		dbg_msg("server", "failed to load map. mapname='%s'", g_Config.m_SvMap);
 		return -1;
 	}
-
-	m_pLuaState = luaL_newstate();
 
 	// start server
 	NETADDR BindAddr;
@@ -1544,6 +1550,17 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+// lua
+void CServer::ConLuaLastError(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	int i = 0;
+	if(pResult->NumArguments() > 0)
+		i = pResult->GetInteger(0);
+	pServer->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "lua-errors", "[%i/%i] %s", i+1, pServer->Lua()->NumErrors(), pServer->Lua()->GetError(i));
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -1603,6 +1620,7 @@ void CServer::RegisterCommands()
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pLua = Kernel()->RequestInterface<ILua>();
 
 	// register console commands
 	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
@@ -1614,6 +1632,10 @@ void CServer::RegisterCommands()
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
+
+	// lua
+	Console()->Register("lua_lasterror", "?i", CFGFLAG_SERVER, ConLuaLastError, this, "show the last i errors (default 1)");
+
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
@@ -1677,6 +1699,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
+	ILua *pLua = CreateLua();
 
 	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
 
@@ -1693,6 +1716,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer));
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pLua);
 
 		if(RegisterFail)
 			return -1;
@@ -1717,6 +1741,8 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfig->RestoreStrings();
 
 	pEngine->InitLogfile();
+
+	pLua->Init();
 
 	// run the server
 	dbg_msg("server", "starting...");

@@ -21,13 +21,19 @@ public:
 		y = ny;
 	}
 
-	vector2_base operator -() const { return vector2_base(-x, -y); }
+	vector2_base(T nxy)
+	{
+		x = nxy;
+		y = nxy;
+	}
+
+	//vector2_base operator -() const { return vector2_base(-x, -y); }
 	vector2_base operator -(const vector2_base &v) const { return vector2_base(x-v.x, y-v.y); }
 	vector2_base operator +(const vector2_base &v) const { return vector2_base(x+v.x, y+v.y); }
 	vector2_base operator *(const T v) const { return vector2_base(x*v, y*v); }
-	vector2_base operator *(const vector2_base &v) const { return vector2_base(x*v.x, y*v.y); }
+	//vector2_base operator *(const vector2_base &v) const { return vector2_base(x*v.x, y*v.y); }
 	vector2_base operator /(const T v) const { return vector2_base(x/v, y/v); }
-	vector2_base operator /(const vector2_base &v) const { return vector2_base(x/v.x, y/v.y); }
+	//vector2_base operator /(const vector2_base &v) const { return vector2_base(x/v.x, y/v.y); }
 
 	const vector2_base &operator =(const vector2_base &v) { x = v.x; y = v.y; return *this; }
 
@@ -39,10 +45,19 @@ public:
 	const vector2_base &operator /=(const vector2_base &v) { x /= v.x; y /= v.y; return *this; }
 
 	bool operator ==(const vector2_base &v) const { return x == v.x && y == v.y; } //TODO: do this with an eps instead
+	bool operator !=(const vector2_base &v) const { return x != v.x || y != v.y; }
 
 	operator const T* () { return &x; }
 };
 
+template<typename T>
+inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
+{
+	angle = angle * 3.1415926535897932384626433f / 180.0f;
+	float s = sinf(angle);
+	float c = cosf(angle);
+	return vector2_base<T>((T)(c*a.x - s*a.y), (T)(s*a.x + c*a.y));
+}
 
 template<typename T>
 inline T length(const vector2_base<T> &a)
@@ -81,7 +96,7 @@ inline vector2_base<T> closest_point_on_line(vector2_base<T> line_point0, vector
 	v = normalize(v);
 	T d = length(line_point0-line_point1);
 	T t = dot(v, c)/d;
-	return mix(line_point0, line_point1, clamp(t, (T)0, (T)1));
+	return mix(line_point0, line_point1, t < (T)0 ? (T)0 : t > (T)1 ? (T)1 : t);
 	/*
 	if (t < 0) t = 0;
 	if (t > 1.0f) return 1.0f;
@@ -93,8 +108,8 @@ template<typename T>
 class vector3_base
 {
 public:
-	union { T x,r,h; };
-	union { T y,g,s; };
+	union { T x,r,  h; };
+	union { T y,g,  s; };
 	union { T z,b,v,l; };
 
 	vector3_base() {}
@@ -105,15 +120,35 @@ public:
 		z = nz;
 	}
 
+	vector3_base(vector2_base<T> v, T nz)
+	{
+		x = v.x;
+		y = v.y;
+		z = nz;
+	}
+	vector3_base(T nx, vector2_base<T> v)
+	{
+		x = nx;
+		y = v.x;
+		z = v.y;
+	}
+
+	vector3_base(T nxyz)
+	{
+		x = nxyz;
+		y = nxyz;
+		z = nxyz;
+	}
+
 	const vector3_base &operator =(const vector3_base &v) { x = v.x; y = v.y; z = v.z; return *this; }
 
 	vector3_base operator -(const vector3_base &v) const { return vector3_base(x-v.x, y-v.y, z-v.z); }
-	vector3_base operator -() const { return vector3_base(-x, -y, -z); }
+	//vector3_base operator -() const { return vector3_base(-x, -y, -z); }
 	vector3_base operator +(const vector3_base &v) const { return vector3_base(x+v.x, y+v.y, z+v.z); }
 	vector3_base operator *(const T v) const { return vector3_base(x*v, y*v, z*v); }
-	vector3_base operator *(const vector3_base &v) const { return vector3_base(x*v.x, y*v.y, z*v.z); }
+	//vector3_base operator *(const vector3_base &v) const { return vector3_base(x*v.x, y*v.y, z*v.z); }
 	vector3_base operator /(const T v) const { return vector3_base(x/v, y/v, z/v); }
-	vector3_base operator /(const vector3_base &v) const { return vector3_base(x/v.x, y/v.y, z/v.z); }
+	//vector3_base operator /(const vector3_base &v) const { return vector3_base(x/v.x, y/v.y, z/v.z); }
 
 	const vector3_base &operator +=(const vector3_base &v) { x += v.x; y += v.y; z += v.z; return *this; }
 	const vector3_base &operator -=(const vector3_base &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
@@ -125,6 +160,7 @@ public:
 	bool operator ==(const vector3_base &v) const { return x == v.x && y == v.y && z == v.z; } //TODO: do this with an eps instead
 
 	operator const T* () { return &x; }
+	operator const vector2_base<T>* () { return vector2_base<T>(x,y); }
 };
 
 template<typename T>
@@ -156,9 +192,9 @@ template<typename T>
 inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
 {
 	return vector3_base<T>(
-		a.y*b.z - a.z*b.y,
-		a.z*b.x - a.x*b.z,
-		a.x*b.y - a.y*b.x);
+			a.y*b.z - a.z*b.y,
+			a.z*b.x - a.x*b.z,
+			a.x*b.y - a.y*b.x);
 }
 
 typedef vector3_base<float> vec3;
@@ -171,10 +207,10 @@ template<typename T>
 class vector4_base
 {
 public:
-	union { T x,r; };
-	union { T y,g; };
-	union { T z,b; };
-	union { T w,a; };
+	union { T x,   r; };
+	union { T y,   g; };
+	union { T z,u, b; };
+	union { T w,v, a; };
 
 	vector4_base() {}
 	vector4_base(T nx, T ny, T nz, T nw)
@@ -183,6 +219,51 @@ public:
 		y = ny;
 		z = nz;
 		w = nw;
+	}
+
+	vector4_base(vector3_base<T> v, T nw)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = nw;
+	}
+	vector4_base(T nx, vector3_base<T> v)
+	{
+		x = nx;
+		y = v.x;
+		z = v.y;
+		w = v.z;
+	}
+
+	vector4_base(vector2_base<T> v, T nz, T nw)
+	{
+		x = v.x;
+		y = v.y;
+		z = nz;
+		w = nw;
+	}
+	vector4_base(T nx, vector2_base<T> v, T nw)
+	{
+		x = nx;
+		y = v.x;
+		z = v.y;
+		w = nw;
+	}
+	vector4_base(T nx, T ny, vector2_base<T> v)
+	{
+		x = nx;
+		y = ny;
+		z = v.x;
+		w = v.y;
+	}
+
+	vector4_base(T nxyz)
+	{
+		x = nxyz;
+		y = nxyz;
+		z = nxyz;
+		w = nxyz;
 	}
 
 	vector4_base operator +(const vector4_base &v) const { return vector4_base(x+v.x, y+v.y, z+v.z, w+v.w); }
@@ -205,6 +286,8 @@ public:
 	bool operator ==(const vector4_base &v) const { return x == v.x && y == v.y && z == v.z && w == v.w; } //TODO: do this with an eps instead
 
 	operator const T* () { return &x; }
+	operator const vector3_base<T> () { return vector3_base<T>(r,g,b); }
+	operator const vector2_base<T> () { return vector2_base<T>(r,g); }
 };
 
 typedef vector4_base<float> vec4;
