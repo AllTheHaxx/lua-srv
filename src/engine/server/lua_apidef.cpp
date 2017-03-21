@@ -8,6 +8,9 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
+#include <game/server/player.h>
+#include <game/server/gamecontext.h>
+
 #include "luabinding.h"
 
 
@@ -104,6 +107,10 @@ void CLua::RegisterLuaBindings()
 			.addData("a", &vector4_base<int>::a)
 		.endClass()
 
+		.beginClass<CPlayer>("CPlayer")
+
+		.endClass()
+
 		// TODO: PUT  STUFF  HERE
 		// Game.Server
 		.beginClass<IServer>("IServer")
@@ -116,6 +123,7 @@ void CLua::RegisterLuaBindings()
 
 		.beginNamespace("Game")
 			.addVariable("Server", &CLua::m_pServer, false)
+			.addFunction("Players", &CGameContext::GetPlayer)
 		.endNamespace()
 
 		// g_Config stuff... EVERYTHING AT ONCE!

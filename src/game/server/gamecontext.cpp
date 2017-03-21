@@ -86,6 +86,13 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
+static CPlayer *GetPlayer(int ClientID)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS || !CLua::ms_pCGameServer->m_apPlayers[ClientID])
+		return 0;
+	return CLua::ms_pCGameServer->m_apPlayers[ClientID];
+}
+
 void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount)
 {
 	float a = 3 * 3.14159f / 2 + Angle;

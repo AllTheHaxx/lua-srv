@@ -84,13 +84,14 @@ public:
 	void Clear();
 
 	CEventHandler m_Events;
-	CPlayer *m_apPlayers[MAX_CLIENTS];
+	static CPlayer *m_apPlayers[MAX_CLIENTS];
 
 	IGameController *m_pController;
 	CGameWorld m_World;
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
+	static CPlayer *GetPlayer(int ClientID); // 4 lua
 
 	int m_LockTeams;
 
