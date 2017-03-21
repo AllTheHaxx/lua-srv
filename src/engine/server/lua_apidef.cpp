@@ -3,6 +3,8 @@
 #include <base/system.h>
 #include <base/vmath.h>
 
+#include <engine/server.h>
+
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
@@ -103,6 +105,18 @@ void CLua::RegisterLuaBindings()
 		.endClass()
 
 		// TODO: PUT  STUFF  HERE
+		// Game.Server
+		.beginClass<IServer>("IServer")
+			.addProperty("Tick", &IServer::Tick)
+			.addProperty("TickSpeed", &IServer::TickSpeed)
+
+			.addFunction("IsAuthed", &IServer::IsAuthed)
+			.addFunction("Kick", &IServer::Kick)
+		.endClass()
+
+		.beginNamespace("Game")
+			.addVariable("Server", &CLua::m_pServer, false)
+		.endNamespace()
 
 		// g_Config stuff... EVERYTHING AT ONCE!
 		/// Config.<var_name>

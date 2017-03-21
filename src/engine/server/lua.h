@@ -40,7 +40,7 @@ protected:
 public:
 	CLua();
 
-	virtual void Init();
+	virtual void Init(IServer *pServer);
 	virtual void StartupLua();
 	virtual bool LoadGametype(const char *pGameType);
 	virtual bool GametypeExists(const char *pGameType);
@@ -58,6 +58,8 @@ public:
 	static int HandleException(const char *pError);
 	static int ErrorFunc(lua_State *L);
 	static int Panic(lua_State *L);
+
+	static IServer *m_pServer;
 
 private:
 //	int LoadFolderHelper(const char *pFolder);

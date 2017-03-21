@@ -7,7 +7,7 @@
 
 #include "lua.h"
 
-//IServer * CLua::ms_pServer = 0;
+IServer * CLua::m_pServer = 0;
 //CServer * CLua::ms_pCServer = 0;
 //IGameServer * CLua::ms_pGameServer = 0;
 CGameContext * CLua::ms_pCGameServer = 0;
@@ -28,10 +28,11 @@ void CLua::SetStaticVars(IServer *pServer, CGameContext *pGameServer)
 	CLua::ms_pCGameServer = pGameServer;
 }
 
-void CLua::Init()
+void CLua::Init(IServer *pServer)
 {
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pServer = pServer;
 }
 
 const char *CLua::GetError(int i)

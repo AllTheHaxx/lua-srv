@@ -1,6 +1,7 @@
 #ifndef ENGINE_LUA_H
 #define ENGINE_LUA_H
 #include "kernel.h"
+#include "server.h"
 
 #define LUA_GAMETYPE_FOLDER "gametypes"
 
@@ -13,7 +14,7 @@ protected:
 public:
 	virtual class lua_State *GetLuaState() { return m_pLuaState; }
 
-	virtual void Init() = 0;
+	virtual void Init(IServer *pServer) = 0;
 	virtual void StartupLua() = 0;
 	virtual bool LoadGametype(const char *pGameType) = 0;
 	virtual bool GametypeExists(const char *pGameType) = 0;

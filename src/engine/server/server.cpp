@@ -1742,7 +1742,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pEngine->InitLogfile();
 
-	pLua->Init();
+	pLua->Init(pServer);
 
 	// run the server
 	dbg_msg("server", "starting...");
