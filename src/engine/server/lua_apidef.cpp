@@ -108,7 +108,24 @@ void CLua::RegisterLuaBindings()
 		.endClass()
 
 		.beginClass<CPlayer>("CPlayer")
+			// functions
+			.addFunction("Respawn", &CPlayer::Respawn)
+			.addFunction("SetTeam", &CPlayer::SetTeam)
+			.addFunction("KillCharacter", &CPlayer::KillCharacter)
 
+			// attributes
+			.addProperty("Team", &CPlayer::GetTeam)
+			.addData("PlayerFlags", &CPlayer::m_PlayerFlags)
+			.addData("SpectatorID", &CPlayer::m_SpectatorID)
+			.addData("RespawnTick", &CPlayer::m_RespawnTick)
+			.addData("DieTick", &CPlayer::m_DieTick)
+			.addData("Score", &CPlayer::m_Score)
+			.addData("ScoreStartTick", &CPlayer::m_ScoreStartTick)
+			.addData("ForceBalanced", &CPlayer::m_ForceBalanced)
+			.addData("LastActionTick", &CPlayer::m_LastActionTick)
+			.addData("TeamChangeTick", &CPlayer::m_TeamChangeTick)
+			// TODO: add the m_TeeInfos struct (probably really easy :D) (yet better add all the structs.)
+			//.addProperty("Character", &CPlayer::GetCharacter)
 		.endClass()
 
 		// TODO: PUT  STUFF  HERE
