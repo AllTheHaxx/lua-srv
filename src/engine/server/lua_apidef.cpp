@@ -156,6 +156,26 @@ void CLua::RegisterLuaBindings()
 
 			.addFunction("IsAuthed", &IServer::IsAuthed)
 			.addFunction("Kick", &IServer::Kick)
+
+			// CGameContext stuff (makes sense in Game.Server IMO)
+			.addFunction("StartVote", &CGameContext::StartVote)
+			.addFunction("EndVote", &CGameContext::EndVote)
+
+			.addFunction("CreateDamageInd", &CGameContext::CreateDamageInd)
+			.addFunction("CreateExplosion", &CGameContext::CreateExplosion)
+			.addFunction("CreateHammerHit", &CGameContext::CreateHammerHit)
+			.addFunction("CreatePlayerSpawn", &CGameContext::CreatePlayerSpawn)
+			.addFunction("CreateDeath", &CGameContext::CreateDeath)
+			.addFunction("CreateSound", &CGameContext::CreateSound)
+			.addFunction("CreateSoundGlobal", &CGameContext::CreateSoundGlobal)
+
+			.addFunction("SendChatTarget", &CGameContext::SendChatTarget)
+			.addFunction("SendChat", &CGameContext::SendChat)
+			.addFunction("SendEmoticon", &CGameContext::SendEmoticon)
+			.addFunction("SendWeaponPickup", &CGameContext::SendWeaponPickup)
+			.addFunction("SendBroadcast", &CGameContext::SendBroadcast)
+
+			.addFunction("SwapTeams", &CGameContext::SwapTeams)
 		.endClass()
 
 		.beginNamespace("Game")
