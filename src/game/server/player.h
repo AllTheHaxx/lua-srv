@@ -96,8 +96,8 @@ public:
 		int m_Max;
 	} m_Latency;
 
+	CCharacter *m_pCharacter; // public for dem lua
 private:
-	CCharacter *m_pCharacter;
 	CGameContext *m_pGameServer;
 
 	CGameContext *GameServer() const { return m_pGameServer; }

@@ -11,6 +11,8 @@
 #include <game/server/player.h>
 #include <game/server/gamecontext.h>
 
+#include <game/server/entities/character.h>
+
 #include "luabinding.h"
 
 
@@ -107,6 +109,24 @@ void CLua::RegisterLuaBindings()
 			.addData("a", &vector4_base<int>::a)
 		.endClass()
 
+		// Game:Players(ID).Character
+		.beginClass<CCharacter>("CCharacter")
+			// functions
+			.addFunction("Die", &CCharacter::Die)
+			.addFunction("TakeDamage", &CCharacter::TakeDamage)
+			.addFunction("IncreaseHealth", &CCharacter::IncreaseHealth)
+			.addFunction("IncreaseArmor", &CCharacter::IncreaseArmor)
+			.addFunction("GiveWeapon", &CCharacter::GiveWeapon)
+			.addFunction("GiveNinja", &CCharacter::GiveNinja)
+			.addFunction("SetEmote", &CCharacter::SetEmote)
+
+			// attributes
+			.addProperty("ActiveWeapon", &CCharacter::GetWeapon, &CCharacter::SetWeapon)
+			//.addProperty("IsGrounded", CCharacter::IsGrounded) // not sure why this won't work
+			.addProperty("IsAlive", &CCharacter::IsAlive)
+		.endClass()
+
+		// Game:Players(ID)
 		.beginClass<CPlayer>("CPlayer")
 			// functions
 			.addFunction("Respawn", &CPlayer::Respawn)
@@ -115,17 +135,17 @@ void CLua::RegisterLuaBindings()
 
 			// attributes
 			.addProperty("Team", &CPlayer::GetTeam)
-			.addData("PlayerFlags", &CPlayer::m_PlayerFlags)
-			.addData("SpectatorID", &CPlayer::m_SpectatorID)
-			.addData("RespawnTick", &CPlayer::m_RespawnTick)
-			.addData("DieTick", &CPlayer::m_DieTick)
-			.addData("Score", &CPlayer::m_Score)
-			.addData("ScoreStartTick", &CPlayer::m_ScoreStartTick)
-			.addData("ForceBalanced", &CPlayer::m_ForceBalanced)
-			.addData("LastActionTick", &CPlayer::m_LastActionTick)
-			.addData("TeamChangeTick", &CPlayer::m_TeamChangeTick)
+			.addData("PlayerFlags", &CPlayer::m_PlayerFlags, true)
+			.addData("SpectatorID", &CPlayer::m_SpectatorID, true)
+			.addData("RespawnTick", &CPlayer::m_RespawnTick, false)
+			.addData("DieTick", &CPlayer::m_DieTick, false)
+			.addData("Score", &CPlayer::m_Score, true)
+			.addData("ScoreStartTick", &CPlayer::m_ScoreStartTick, false)
+			.addData("ForceBalanced", &CPlayer::m_ForceBalanced, false)
+			.addData("LastActionTick", &CPlayer::m_LastActionTick, false)
+			.addData("TeamChangeTick", &CPlayer::m_TeamChangeTick, false)
 			// TODO: add the m_TeeInfos struct (probably really easy :D) (yet better add all the structs.)
-			//.addProperty("Character", &CPlayer::GetCharacter)
+			.addData("Character", &CPlayer::m_pCharacter) // cleaner as variable instead of a getter function I think
 		.endClass()
 
 		// TODO: PUT  STUFF  HERE
