@@ -84,7 +84,7 @@ public:
 	void Clear();
 
 	CEventHandler m_Events;
-	static CPlayer *m_apPlayers[MAX_CLIENTS];
+	CPlayer *m_apPlayers[MAX_CLIENTS];
 
 	IGameController *m_pController;
 	CGameWorld m_World;

@@ -86,7 +86,7 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
-static CPlayer *GetPlayer(int ClientID)
+CPlayer *CGameContext::GetPlayer(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || !CLua::ms_pCGameServer->m_apPlayers[ClientID])
 		return 0;
